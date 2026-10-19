@@ -5,7 +5,7 @@ Independent, offline-first vote tallying for Papua New Guinea candidate teams. *
 | Folder | What |
 |---|---|
 | `src/` | Next.js 15 website (App Router, TypeScript) - landing page, sign-in, live team dashboard. Deploys to Vercel. |
-| `supabase/` | Database schema + migrations (run in order: `001_schema.sql` through `008_security_hardening.sql`, all in `supabase/migrations/`). |
+| `supabase/` | Database schema + migrations (run in order: `001_schema.sql` through `010_seed_png_provinces_districts.sql`, all in `supabase/migrations/`). |
 | `android/` | Offline-first Kotlin / Compose scrutineer app. Built by GitHub Actions (`.github/workflows/build-apk.yml`). |
 | `docs/` | Implementation plan and the original Android/backend README. |
 
@@ -52,7 +52,7 @@ For platform administrators only (`app_metadata.platform_role = 'admin'`). Tabs:
 - **Registrations:** approve (creates the team and adds the candidate) or reject with a reason.
 - **Teams:** scrutineer count, uploads, last activity; suspend / reinstate; open any team's dashboard read-only;
   create and revoke invitation codes (the code is shown once, only its hash is stored).
-- **Elections:** create elections and move them through setup > active > closed > archived (reopening a closed election needs a written reason). Records created before an election closed are still accepted for 30 days so offline devices can finish syncing.
+- **Elections:** create elections and move them through setup > active > closed > archived (opening needs no location dataset) (reopening a closed election needs a written reason). Records created before an election closed are still accepted for 30 days so offline devices can finish syncing.
 - **Locations:** import the election geography from CSV into a *draft* dataset (validated: parents, nesting, duplicates, required source citation), review counts, then activate. See `docs/LOCATION_DATA_SOURCES.md` for official sources and current data status.
 - **Audit log:** append-only history of admin and team actions, with filter and paging.
 
