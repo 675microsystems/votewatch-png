@@ -22,7 +22,7 @@ export function TeamConsole({ teams }: { teams: Team[] }) {
           <b>{teamLabel(team.candidate_name, team.team_name) + " – " + team.election_name}</b>
         )}
         <span className="note">You are the {team.member_role === "candidate" ? "candidate" : "team admin"}.</span>
-        <Link className="btn" href="/dashboard">Results dashboard</Link>
+        <Link className="btn" href="/">Results dashboard</Link>
       </div>
       <div className="tabs" role="tablist">
         <button role="tab" aria-selected={tab === "invitations"} className={tab === "invitations" ? "on" : ""} onClick={() => setTab("invitations")}>Invitation codes</button>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyError } from "@/lib/errors";
 
 export function useSupabase() {
   return useMemo(() => createClient(), []);
@@ -18,7 +19,7 @@ export function useRpc<T>(fn: string, args?: Record<string, unknown>) {
   const reload = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.rpc(fn, JSON.parse(argsKey));
-    if (error) setError(error.message);
+    if (error) setError(friendlyError(error.message));
     else { setError(""); setData(data as T); }
     setLoading(false);
   }, [supabase, fn, argsKey]);

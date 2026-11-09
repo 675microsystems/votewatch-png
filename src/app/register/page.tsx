@@ -26,19 +26,18 @@ type RegRow = {
 
 type Loc = { id: string; election_id: string; parent_id: string | null; name: string; location_type: "province" | "district" };
 
-// Provinces and districts for the given elections, labelled "District (Province)".
+// Provinces and districts for the given elections. Districts carry their province (parent_id) so the form can filter them.
 async function loadAreas(supabase: Awaited<ReturnType<typeof createClient>>, electionIds: string[]): Promise<AreaOption[]> {
   const { data } = await supabase
     .from("locations").select("id,election_id,parent_id,name,location_type")
     .in("election_id", electionIds).in("location_type", ["province", "district"]);
   const locs = (data ?? []) as Loc[];
-  const byId = new Map(locs.map((l) => [l.id, l]));
   return locs.map((l) => ({
     id: l.id,
     election_id: l.election_id,
     kind: l.location_type,
-    label: l.location_type === "district" && l.parent_id && byId.get(l.parent_id)
-      ? `${l.name} (${byId.get(l.parent_id)!.name})` : l.name,
+    parent_id: l.parent_id,
+    name: l.name,
   }));
 }
 
@@ -77,7 +76,7 @@ export default async function RegisterPage() {
           </div>
         )}
         {reg.status === "approved" && (
-          <div className="notice"><b>Approved.</b> <Link href="/team">Manage your team and invitations</Link> or <Link href="/dashboard">open your dashboard</Link>.</div>
+          <div className="notice"><b>Approved.</b> <Link href="/team">Manage your team and invitations</Link> or <Link href="/">open your dashboard</Link>.</div>
         )}
         {reg.status === "rejected" && (
           <div className="notice"><b>Not approved.</b>{reg.review_note ? ` Reason: ${reg.review_note}` : ""} Contact the administrator if you think this is a mistake.</div>

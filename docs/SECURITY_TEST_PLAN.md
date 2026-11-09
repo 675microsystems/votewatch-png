@@ -42,7 +42,7 @@ and one `stranger` (signed up, no team). Register and approve candA and candB th
 | 26 | scrA1 | Two concurrent uploads for one place | Both flagged (no lost flag). |
 | 27 | scrA1 | Correct a record that was already corrected | Stored as `needs_review`, not rejected. |
 | 28 | admin | Close an election, then sync a record created BEFORE the close | Accepted. A record created AFTER the close, or uploaded 30+ days later, is refused. |
-| 29 | admin | Move closed to active without a reason; archived to anything; setup to active with no dataset | All refused. |
+| 29 | admin | Move closed to active without a reason; archived to anything | Both refused. (Opening from setup no longer needs a location dataset, migration 009.) |
 | 30 | admin | Suspend a team, then as candA call `dashboard_rollup`, `team_roster`, select `tally_records` | All refused / empty. Realtime stops delivering. `/register` shows "Suspended". |
 | 31 | any user | Insert directly into `candidate_registrations` | Permission denied. `register_candidate` with a district for a Governor candidate (or the reverse) is refused. |
 | 32 | candA | Edit a pending registration; resubmit a rejected one; withdraw a pending one | Each works, audit-logged. Editing an approved registration is refused. |

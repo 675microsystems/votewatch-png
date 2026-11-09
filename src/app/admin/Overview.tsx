@@ -19,8 +19,8 @@ function TeamDonut({ ok, pending, suspended }: { ok: number; pending: number; su
   };
   return (
     <svg viewBox="0 0 120 120" className="donut" role="img" aria-label={`${ok} approved, ${pending} pending, ${suspended} suspended teams`}>
-      <circle cx="60" cy="60" r="46" fill="none" stroke="rgba(255,255,255,.1)" strokeWidth="14" />
-      {seg(ok, "#3de3fb")}{seg(pending, "#ffb300")}{seg(suspended, "#ff6b7d")}
+      <circle cx="60" cy="60" r="46" fill="none" className="d-track" strokeWidth="14" />
+      {seg(ok, "var(--chart1)")}{seg(pending, "#ffb300")}{seg(suspended, "#ff6b7d")}
       <text x="60" y="67" textAnchor="middle" className="donut-t">{total}</text>
     </svg>
   );

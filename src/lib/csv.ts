@@ -22,3 +22,12 @@ export function parseCsv(text: string): string[][] {
   if (row.some((c) => c.trim() !== "")) rows.push(row);
   return rows;
 }
+
+// Numbers are written as numbers (so a negative difference stays numeric). Text is neutralised against
+// spreadsheet formula injection, same rule as the Android export.
+export function csvCell(v: unknown) {
+  if (typeof v === "number" && Number.isFinite(v)) return String(v);
+  let s = v == null ? "" : String(v);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return '"' + s.replace(/"/g, '""') + '"';
+}

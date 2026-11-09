@@ -10,7 +10,7 @@ type Move = { to: Status_; label: string; warn: string; danger?: boolean; noteRe
 // Allowed moves (mirrors admin_set_election_status in the database, which is the real enforcement).
 const MOVES: Record<Status_, Move[]> = {
   setup: [
-    { to: "active", label: "Open election", warn: "Candidates can register and scrutineers can upload tallies. A location dataset must already be activated." },
+    { to: "active", label: "Open election", warn: "Candidates can register and scrutineers can upload tallies." },
     { to: "archived", label: "Archive", warn: "Archive this election without opening it?" },
   ],
   active: [
@@ -78,13 +78,12 @@ export function Elections() {
 
       <div className="wrap">
         <table className="left">
-          <thead><tr><th>Election</th><th>Year</th><th>Status</th><th>Closed</th><th>Location dataset</th><th></th></tr></thead>
+          <thead><tr><th>Election</th><th>Year</th><th>Status</th><th>Closed</th><th></th></tr></thead>
           <tbody>
             {(rows ?? []).map((r) => (
               <tr key={r.id}>
                 <td>{r.name}</td><td>{r.election_year}</td><td><Badge value={r.status} /></td>
                 <td>{r.status === "closed" || r.status === "archived" ? fmtDate(r.closed_at) : "–"}</td>
-                <td>{r.location_dataset_version ?? "–"}</td>
                 <td style={{ whiteSpace: "nowrap" }}>
                   {MOVES[r.status].map((m) => (
                     <button key={m.to} className={m.to === "active" && r.status === "setup" ? "p" : undefined} onClick={() => setActing({ e: r, m })}>{m.label}</button>
@@ -98,7 +97,7 @@ export function Elections() {
       </div>
       <p className="note">
         Tallies are accepted while an election is <b>active</b>. After closing, records created before the close time are still accepted for 30 days
-        so devices that were offline can finish syncing. Load and activate the geography in the <b>Locations</b> tab before opening an election.
+        so devices that were offline can finish syncing.
       </p>
     </div>
   );

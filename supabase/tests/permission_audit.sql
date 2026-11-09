@@ -1,4 +1,4 @@
--- READ-ONLY permission audit. Paste into the Supabase SQL editor of the STAGING project after running 001-008.
+-- READ-ONLY permission audit. Paste into the Supabase SQL editor of the STAGING project after running 001-010.
 -- Every result set should be empty or match what you expect. Nothing here changes data.
 
 -- A. Tables in public WITHOUT row level security (expect: none)

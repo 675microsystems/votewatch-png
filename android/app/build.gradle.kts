@@ -28,9 +28,27 @@ android {
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${cfg("SUPABASE_ANON_KEY")}\"")
     }
 
+    // Release signing. Values come from local.properties (local builds) or environment variables (CI).
+    // Nothing is committed: the keystore and passwords stay with you. If they are absent, the release
+    // build is simply left unsigned so debug builds and CI keep working.
+    val releaseStore = cfg("KEYSTORE_PATH")
+    signingConfigs {
+        if (releaseStore.isNotEmpty()) {
+            create("release") {
+                storeFile = file(releaseStore)
+                storePassword = cfg("KEYSTORE_PASSWORD")
+                keyAlias = cfg("KEY_ALIAS")
+                keyPassword = cfg("KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfigs.findByName("release")?.let { signingConfig = it }
         }
     }
 

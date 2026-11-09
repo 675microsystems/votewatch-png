@@ -23,7 +23,7 @@ export default async function AdminPage() {
         <main>
           <h1>Administrators only</h1>
           <p className="note">
-            Your account is not a platform administrator. <Link href="/dashboard">Go to your dashboard</Link>.
+            Your account is not a platform administrator. <Link href="/">Go to your dashboard</Link>.
           </p>
         </main>
       </>

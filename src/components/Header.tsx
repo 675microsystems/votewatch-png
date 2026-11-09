@@ -1,30 +1,34 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Viewer } from "@/lib/viewer";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Header({ viewer }: { viewer?: Viewer }) {
   const v = viewer;
   return (
     <header className="top">
       <Link className="brand" href="/" aria-label="VoteWatch PNG home">
-        <Image src="/mark.png" alt="" width={900} height={548} priority style={{ height: 34, width: "auto" }} />
-        <span>Vote<span className="w">Watch</span></span>
+        <Image src="/mark.png" alt="" width={900} height={470} priority />
+        <span className="bname">Vote<span className="w">Watch</span></span>
         <span className="s">PNG</span>
       </Link>
-      <nav className="nav">
+      <nav className="nav" aria-label="Main">
         {v?.signedIn ? (
           <>
-            {v.isAdmin && <Link className="btn" href="/admin">Admin</Link>}
-            {v.isLeader && <Link className="btn" href="/team">Team</Link>}
-            {(v.isLeader || v.isAdmin) && <Link className="btn" href="/dashboard">Dashboard</Link>}
-            {!v.isLeader && !v.isAdmin && <Link className="btn" href="/register">{v.registration ? "My registration" : "Register as candidate"}</Link>}
+            {v.isLeader && <Link className="btn ghost" href="/">Dashboard</Link>}
+            {v.isLeader && <Link className="btn ghost" href="/team">Team</Link>}
+            {v.isAdmin && <Link className="btn ghost" href="/admin">Admin</Link>}
+            {!v.isLeader && !v.isAdmin && <Link className="btn ghost" href="/register">{v.registration ? "My registration" : "Register as candidate"}</Link>}
+            <ThemeToggle />
+            <span className="avatar" title={v.email ?? undefined} aria-hidden="true">{(v.email ?? "?").charAt(0).toUpperCase()}</span>
             <form action="/auth/signout" method="post" style={{ margin: 0 }}>
-              <button type="submit">Sign out</button>
+              <button type="submit" className="ghost">Sign out</button>
             </form>
           </>
         ) : (
           <>
-            <Link className="btn" href="/signup">Create account</Link>
+            <ThemeToggle />
+            <Link className="btn ghost" href="/signup">Create account</Link>
             <Link className="btn p" href="/login">Sign in</Link>
           </>
         )}

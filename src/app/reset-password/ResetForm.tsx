@@ -22,7 +22,7 @@ export function ResetForm() {
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
     if (error) return setError(error.message);
-    router.push("/dashboard"); router.refresh();
+    router.push("/"); router.refresh();
   }
   return (
     <form onSubmit={onSubmit}>

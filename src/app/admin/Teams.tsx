@@ -112,7 +112,7 @@ export function Teams() {
                 <td className={t.needs_review ? "bad" : undefined}>{t.needs_review || ""}</td>
                 <td>{fmtDate(t.last_record_at)}</td>
                 <td style={{ whiteSpace: "nowrap" }}>
-                  <Link className="btn" href={`/dashboard?team=${t.team_id}`}>View</Link>{" "}
+                  <Link className="btn" href={`/?team=${t.team_id}`}>View</Link>{" "}
                   <button onClick={() => setInviting(t)}>Invites</button>{" "}
                   {t.team_status === "approved" && <button onClick={() => setActing({ t, to: "suspended" })}>Suspend</button>}
                   {t.team_status === "suspended" && <button className="p" onClick={() => setActing({ t, to: "approved" })}>Reinstate</button>}

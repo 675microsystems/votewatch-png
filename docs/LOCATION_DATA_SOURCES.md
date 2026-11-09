@@ -58,3 +58,5 @@ the files.
   Tawae/Siassi (Tewae-Siassi), Sina Sina Yongomugl (Sinasina-Yongomugl), Lagaip (Lagaip-Porgera), Pogera Paiela, Karimui (Karimui-Nomane),
   Koroba Kopiago (Koroba-Lake Kopiago). Fix names in the CSV before importing; keys do not need to change.
 - Population figures in the booklet were used only to verify the extraction and are **not** included.
+
+**Names reconciled with the regional lists (Southern, New Guinea Islands, Momase, Highlands).** The starter CSV and migration `010_seed_png_provinces_districts.sql` use the spellings from the PNG National Parliament / PNGEC district lists (e.g. Mendi-Munihu, Nawaeb, Tewae-Siassi, Koroba-Lake Kopiago; provinces shown as Northern / Oro, Chimbu / Simbu, Sandaun / West Sepik). Counts: 96 districts and 22 provinces (21 + 13 + 26 + 36 districts). Still verify against the official PNGEC source before real use.

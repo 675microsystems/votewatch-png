@@ -41,3 +41,9 @@
 - Independent security review.
 - Lawyer review of the privacy notice and terms; fill in retention, liability and governing law.
 - Create the Android keystore, add the CI secrets, and test the release build.
+
+## 0.6.0
+- New logo set (mark tile, lockup, OG image, app icon).
+- Light/dark theme with a header toggle (saved per browser, defaults to system setting).
+- Homepage is now the live dashboard for signed-in candidates and team admins; /dashboard redirects to /.
+- Sign-in and password reset now land on the homepage.

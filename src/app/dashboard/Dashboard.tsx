@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { teamLabel } from "@/lib/teamName";
+import { friendlyError } from "@/lib/errors";
+import { csvCell } from "@/lib/csv";
+import { enrich, type Row } from "@/lib/rollup";
 import { levelsFor, type Level, type RollupRow, type Team } from "@/lib/types";
 import { ReviewPanel } from "./ReviewPanel";
 
-type Row = RollupRow & { coverage: number | null; diff: number | null; partial: boolean };
 type ColKey = keyof Row;
 
 const COLS: [ColKey, string][] = [
@@ -23,25 +25,6 @@ const COLS: [ColKey, string][] = [
 
 const n = (v: number | null | undefined) => (v == null ? "–" : Number(v).toLocaleString());
 
-function enrich(r: RollupRow): Row {
-  return {
-    ...r,
-    coverage: r.polling_places_total ? r.polling_places_reported / r.polling_places_total : null,
-    diff: r.official_votes == null ? null : r.tally_votes - r.official_votes,
-    // Fewer polling places reported than exist: the tally is expected to be below the official figure.
-    partial: !r.polling_places_total || r.polling_places_reported < r.polling_places_total,
-  };
-}
-
-// Numbers are written as numbers (so a negative difference stays numeric). Text is neutralised against
-// spreadsheet formula injection, same rule as the Android export.
-function csvCell(v: unknown) {
-  if (typeof v === "number" && Number.isFinite(v)) return String(v);
-  let s = v == null ? "" : String(v);
-  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
-  return '"' + s.replace(/"/g, '""') + '"';
-}
-
 type Point = { t: number; my: number; total: number };
 type Activity = { id: string; at: Date; text: string; bad: boolean };
 
@@ -56,8 +39,8 @@ function TrendChart({ points }: { points: Point[] }) {
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="chart" role="img" aria-label="Line chart of your votes and total voted since you opened this page">
       {[0, 0.5, 1].map((f) => <g key={f}><line x1={L} x2={W - 8} y1={y(max * f)} y2={y(max * f)} className="grid" /><text x={0} y={y(max * f) + 4} className="axis">{Math.round(max * f).toLocaleString()}</text></g>)}
-      <polyline points={line("total")} fill="none" stroke="#8fa3c4" strokeWidth="2.5" />
-      <polyline points={line("my")} fill="none" stroke="#3de3fb" strokeWidth="3" />
+      <polyline points={line("total")} fill="none" className="ln2" strokeWidth="2.5" />
+      <polyline points={line("my")} fill="none" className="ln1" strokeWidth="3" />
       <text x={L} y={H - 4} className="axis">{new Date(t0).toLocaleTimeString()}</text>
       <text x={W - 8} y={H - 4} textAnchor="end" className="axis">{new Date(t1).toLocaleTimeString()}</text>
     </svg>
@@ -68,8 +51,8 @@ function Donut({ done, total }: { done: number; total: number }) {
   const pct = total ? done / total : 0, C = 2 * Math.PI * 46;
   return (
     <svg viewBox="0 0 120 120" className="donut" role="img" aria-label={`${Math.round(pct * 100)} percent of polling places have reported`}>
-      <circle cx="60" cy="60" r="46" fill="none" stroke="rgba(255,255,255,.1)" strokeWidth="14" />
-      <circle cx="60" cy="60" r="46" fill="none" stroke="#3de3fb" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${C * pct} ${C}`} transform="rotate(-90 60 60)" />
+      <circle cx="60" cy="60" r="46" fill="none" className="d-track" strokeWidth="14" />
+      <circle cx="60" cy="60" r="46" fill="none" className="d-fill" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${C * pct} ${C}`} transform="rotate(-90 60 60)" />
       <text x="60" y="67" textAnchor="middle" className="donut-t">{Math.round(pct * 100)}%</text>
     </svg>
   );
@@ -78,7 +61,7 @@ function Donut({ done, total }: { done: number; total: number }) {
 export function Dashboard({ teams, readOnly = false }: { teams: Team[]; readOnly?: boolean }) {
   const supabase = useMemo(() => createClient(), []);
   const [teamId, setTeamId] = useState(teams[0].team_id);
-  const [level, setLevel] = useState<Level>("ward");
+  const [level, setLevel] = useState<Level>("district");
   const [rows, setRows] = useState<Row[]>([]);
   const [error, setError] = useState("");
   const [updated, setUpdated] = useState<Date | null>(null);
@@ -109,7 +92,7 @@ export function Dashboard({ teams, readOnly = false }: { teams: Team[]; readOnly
     const { data, error } = await supabase.rpc("dashboard_rollup", { p_team: teamId, p_level: level });
     if (mine !== reqId.current) return; // a newer request has started; drop this answer
     setLoading(false);
-    if (error) { setError(error.message); return; }
+    if (error) { setError(friendlyError(error.message)); return; }
     setError("");
     const next = ((data ?? []) as RollupRow[]).map(enrich);
     const now = new Date();
@@ -150,7 +133,11 @@ export function Dashboard({ teams, readOnly = false }: { teams: Team[]; readOnly
           timer.current = setTimeout(load, 800);
         },
       )
-      .subscribe((status) => setLive(status === "SUBSCRIBED"));
+      .subscribe((status) => {
+        const ok = status === "SUBSCRIBED";
+        setLive(ok);
+        if (ok) load(); // catch anything missed while the channel was down
+      });
     return () => {
       if (timer.current) clearTimeout(timer.current);
       setLive(null);
@@ -277,12 +264,19 @@ export function Dashboard({ teams, readOnly = false }: { teams: Team[]; readOnly
         Share = your candidate&apos;s votes as a percentage of everyone who voted in the areas that have reported.
         Click a heading to sort.
       </div>
+      {!loading && !error && rows.length === 0 && (
+        <p className="note" role="status">
+          No locations are loaded at this level yet. LLG, ward and polling-place lists are added once the Electoral Commission data is imported; try <b>By district</b>.
+        </p>
+      )}
       <div className="wrap">
         <table>
           <thead>
             <tr>
               {COLS.map(([k, t]) => (
-                <th key={k} onClick={() => sortBy(k)}>{t + (k === sortKey ? (sortDir < 0 ? " ▼" : " ▲") : "")}</th>
+                <th key={k} scope="col" aria-sort={k === sortKey ? (sortDir < 0 ? "descending" : "ascending") : "none"}>
+                  <button type="button" className="thbtn" onClick={() => sortBy(k)}>{t + (k === sortKey ? (sortDir < 0 ? " ▼" : " ▲") : "")}</button>
+                </th>
               ))}
             </tr>
           </thead>
