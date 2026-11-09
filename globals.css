@@ -133,3 +133,11 @@ main.wide{max-width:1280px}
 .track{flex:1;height:9px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden}
 .track span{display:block;height:9px;border-radius:5px}.fillg{background:var(--cool)}.fillw{background:var(--warm)}
 .pip{width:8px;height:8px;border-radius:50%;background:var(--acc);flex-shrink:0}.pip.bad{background:var(--bad)}
+
+/* Sortable table headers: real buttons so they work with the keyboard and screen readers. */
+.thbtn { all: unset; cursor: pointer; font: inherit; color: inherit; font-weight: inherit; }
+.thbtn:focus-visible { outline: 2px solid #3de3fb; outline-offset: 2px; }
+
+.foot { max-width: 1100px; margin: 40px auto 24px; padding: 16px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; font-size: 13px; opacity: .8; }
+.foot a { text-decoration: underline; }
+@media print { .foot { display: none; } }

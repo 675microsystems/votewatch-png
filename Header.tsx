@@ -7,7 +7,7 @@ export function Header({ viewer }: { viewer?: Viewer }) {
   return (
     <header className="top">
       <Link className="brand" href="/" aria-label="VoteWatch PNG home">
-        <Image src="/mark.png" alt="" width={900} height={548} priority style={{ height: 34, width: "auto" }} />
+        <Image src="/mark.png" alt="" width={720} height={438} priority style={{ height: 34, width: "auto" }} />
         <span>Vote<span className="w">Watch</span></span>
         <span className="s">PNG</span>
       </Link>

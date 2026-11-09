@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformAdmin } from "@/lib/auth";
 import type { RegStatus, Team } from "@/lib/types";
@@ -12,7 +13,8 @@ export type Viewer = {
 
 const ANON: Viewer = { signedIn: false, email: null, isAdmin: false, isLeader: false, registration: null };
 
-export async function getViewer(): Promise<Viewer> {
+// cache(): one lookup per request, however many components call it.
+export const getViewer = cache(async (): Promise<Viewer> => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
@@ -30,4 +32,4 @@ export async function getViewer(): Promise<Viewer> {
     isLeader,
     registration: ((reg as { status?: RegStatus } | null)?.status ?? null),
   };
-}
+});
