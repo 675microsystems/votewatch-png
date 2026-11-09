@@ -2,3 +2,9 @@
 # NEVER put the Supabase service-role key in the app.
 SUPABASE_URL=https://YOUR-PROJECT.supabase.co
 SUPABASE_ANON_KEY=YOUR-ANON-PUBLIC-KEY
+
+# Release signing (optional; see docs/ANDROID_RELEASE_SIGNING.md). Never commit the keystore or these values.
+# KEYSTORE_PATH=/absolute/path/to/votewatch-release.jks
+# KEYSTORE_PASSWORD=
+# KEY_ALIAS=votewatch
+# KEY_PASSWORD=

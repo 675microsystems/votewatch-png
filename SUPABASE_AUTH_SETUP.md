@@ -32,3 +32,14 @@ Run in the SQL editor, then sign out and in again:
 update auth.users set raw_app_meta_data = raw_app_meta_data || '{"platform_role":"admin"}' where email = 'you@example.com';
 ```
 Never put the `service_role` key in the website, the app, GitHub or Vercel environment variables.
+
+
+## CAPTCHA wiring in the website (optional, recommended)
+The sign-up, sign-in and forgot-password forms support Cloudflare Turnstile.
+1. Create a Turnstile widget in Cloudflare; copy the **site key** and **secret key**.
+2. Supabase > Authentication > Attack Protection: enable CAPTCHA, choose Turnstile, paste the **secret key**.
+3. Vercel: set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` to the **site key** and redeploy. (If you set it without step 2, or step 2
+   without this, sign-in will fail: the two must be switched on together.)
+The Android app does not show a CAPTCHA. Scrutineer sign-in uses the same Supabase Auth, so enabling CAPTCHA in Supabase
+requires the app to send a token too; test the app's sign-in right after enabling and, if it is blocked, either add a
+CAPTCHA to the app or rely on the database-level invitation lockout and Auth rate limits instead.

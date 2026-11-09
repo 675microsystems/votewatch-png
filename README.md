@@ -17,13 +17,14 @@ The website and the app share one Supabase project: the dashboard calls the same
 cp .env.example .env.local   # fill in project URL + anon key
 npm install
 npm run dev                  # http://localhost:3000
+npm run check                # typecheck + lint + unit tests (also run by CI)
 ```
 `/api/health` reports whether the env vars are set.
 
 ## Deploy: GitHub -> Vercel
 1. Push this repo to GitHub.
 2. Vercel > Add New > Project > import the repo. Framework is detected as Next.js; root directory is the repo root.
-3. Add env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Production + Preview).
+3. Add env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Production + Preview). Also set `NEXT_PUBLIC_OPERATOR_NAME` and `NEXT_PUBLIC_CONTACT_EMAIL` for the legal pages, and optionally `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (CAPTCHA, see `docs/SUPABASE_AUTH_SETUP.md`).
 4. Supabase > Authentication > URL Configuration: set Site URL to your Vercel domain and add
    `https://*-<team>.vercel.app/**` as a redirect URL for previews.
 5. Every push to `main` deploys; every PR gets a preview URL.
@@ -38,6 +39,7 @@ APK workflow now runs inside `android/`, so add `SUPABASE_URL` and `SUPABASE_ANO
 ## Pages and who uses them
 | Page | Who | Purpose |
 |---|---|---|
+| `/privacy`, `/terms` | everyone | Draft privacy notice and terms. Fill in operator details (env vars) and get legal review. |
 | `/`, `/signup`, `/login`, `/forgot-password`, `/reset-password` | everyone | Account creation and recovery. E-mail links return via `/auth/callback`. |
 | `/register` | any signed-in user | Register a candidacy (choose your district or province from the list), see approval status, edit or withdraw while pending, fix and resubmit if rejected. |
 | `/team` | approved candidate / team admin | Create and revoke invitation codes, see the scrutineer roster, remove or reinstate people, promote team admins. |
@@ -65,7 +67,6 @@ update auth.users set raw_app_meta_data = raw_app_meta_data || '{"platform_role"
 
 ## Roadmap (website)
 - LLG / ward / polling-place data (waiting on NSO and PNGEC)
-- Rate limiting on invitation claims; privacy and terms pages
 - Coverage by scrutineer and discrepancy reports; web entry of tallies
 
 ## Release gate

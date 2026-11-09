@@ -209,4 +209,9 @@ revoke all on function public.dashboard_rollup(uuid, public.location_type) from 
 grant execute on function public.dashboard_rollup(uuid, public.location_type) to authenticated;
 
 -- Live updates for the dashboard (Supabase Realtime respects the RLS policy above).
-alter publication supabase_realtime add table public.tally_records;
+do $$ begin
+  if not exists (select 1 from pg_publication_tables
+                 where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'tally_records') then
+    alter publication supabase_realtime add table public.tally_records;
+  end if;
+end $$;
