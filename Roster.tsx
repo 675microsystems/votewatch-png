@@ -2,15 +2,11 @@
 
 import { useState } from "react";
 import type { Team, TeamMember } from "@/lib/types";
-import { activityOf, type Activity } from "@/lib/activity";
 import { ActionPanel, Badge, fmtDate, Status, useRpc, useSupabase } from "@/components/ui";
 
 type Act = { m: TeamMember; kind: "remove" | "reinstate" | "make_admin" | "make_scrutineer" };
 
 const ROLE_LABEL: Record<TeamMember["member_role"], string> = { candidate: "Candidate", team_admin: "Team admin", scrutineer: "Scrutineer" };
-const ACT_LABEL: Record<Activity, [string, string]> = {
-  active: ["Active", "badge ok"], quiet: ["Quiet 2h+", "badge"], silent: ["Silent 6h+", "badge bad"], never: ["No uploads yet", "badge bad"],
-};
 
 export function Roster({ team }: { team: Team }) {
   const supabase = useSupabase();
@@ -18,9 +14,7 @@ export function Roster({ team }: { team: Team }) {
   const [acting, setActing] = useState<Act | null>(null);
   const isCandidate = team.member_role === "candidate";
 
-  const scrutineers = (data ?? []).filter((m) => m.active && m.member_role === "scrutineer");
-  const active = scrutineers.length;
-  const silent = scrutineers.filter((m) => ["silent", "never"].includes(activityOf(m.last_record_at))).length;
+  const active = (data ?? []).filter((m) => m.active && m.member_role === "scrutineer").length;
   const titles: Record<Act["kind"], string> = {
     remove: "Remove from the team? They can no longer upload tallies. Their past records are kept.",
     reinstate: "Reinstate this member?",
@@ -30,11 +24,7 @@ export function Roster({ team }: { team: Team }) {
 
   return (
     <div>
-      <div className="bar">
-        <button onClick={reload}>Refresh</button>
-        <span className="note">{active} / 100 active scrutineers</span>
-        {silent > 0 && <span className="bad" role="status">{silent} silent or not yet uploaded</span>}
-      </div>
+      <div className="bar"><button onClick={reload}>Refresh</button><span className="note">{active} / 100 active scrutineers</span></div>
       <Status error={error} loading={loading && !data} />
 
       {acting && (
@@ -58,36 +48,29 @@ export function Roster({ team }: { team: Team }) {
 
       <div className="wrap">
         <table className="left">
-          <thead><tr><th>Name</th><th>E-mail</th><th>Role</th><th>Status</th><th>Activity</th><th>Joined</th><th>Records</th><th>Last upload</th><th></th></tr></thead>
+          <thead><tr><th>Name</th><th>E-mail</th><th>Role</th><th>Status</th><th>Joined</th><th>Records</th><th>Last upload</th><th></th></tr></thead>
           <tbody>
-            {(data ?? []).map((m) => {
-              const a = m.active && m.member_role === "scrutineer" ? ACT_LABEL[activityOf(m.last_record_at)] : null;
-              return (
-                <tr key={m.user_id}>
-                  <td>{m.display_name}</td><td>{m.email}</td><td>{ROLE_LABEL[m.member_role]}</td>
-                  <td><Badge value={m.active ? "active" : "removed"} /></td>
-                  <td>{a ? <span className={a[1]}>{a[0]}</span> : "–"}</td>
-                  <td>{fmtDate(m.joined_at)}</td><td>{m.records.toLocaleString()}</td><td>{fmtDate(m.last_record_at)}</td>
-                  <td style={{ whiteSpace: "nowrap" }}>
-                    {m.member_role !== "candidate" && (isCandidate || m.member_role === "scrutineer") && (
-                      m.active
-                        ? <button onClick={() => setActing({ m, kind: "remove" })}>Remove</button>
-                        : <button className="p" onClick={() => setActing({ m, kind: "reinstate" })}>Reinstate</button>
-                    )}{" "}
-                    {isCandidate && m.active && m.member_role === "scrutineer" && <button onClick={() => setActing({ m, kind: "make_admin" })}>Make admin</button>}
-                    {isCandidate && m.active && m.member_role === "team_admin" && <button onClick={() => setActing({ m, kind: "make_scrutineer" })}>Make scrutineer</button>}
-                  </td>
-                </tr>
-              );
-            })}
-            {data && !data.length && <tr><td colSpan={9} className="note">No members yet.</td></tr>}
+            {(data ?? []).map((m) => (
+              <tr key={m.user_id}>
+                <td>{m.display_name}</td><td>{m.email}</td><td>{ROLE_LABEL[m.member_role]}</td>
+                <td><Badge value={m.active ? "active" : "removed"} /></td>
+                <td>{fmtDate(m.joined_at)}</td><td>{m.records.toLocaleString()}</td><td>{fmtDate(m.last_record_at)}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  {m.member_role !== "candidate" && (isCandidate || m.member_role === "scrutineer") && (
+                    m.active
+                      ? <button onClick={() => setActing({ m, kind: "remove" })}>Remove</button>
+                      : <button className="p" onClick={() => setActing({ m, kind: "reinstate" })}>Reinstate</button>
+                  )}{" "}
+                  {isCandidate && m.active && m.member_role === "scrutineer" && <button onClick={() => setActing({ m, kind: "make_admin" })}>Make admin</button>}
+                  {isCandidate && m.active && m.member_role === "team_admin" && <button onClick={() => setActing({ m, kind: "make_scrutineer" })}>Make scrutineer</button>}
+                </td>
+              </tr>
+            ))}
+            {data && !data.length && <tr><td colSpan={8} className="note">No members yet.</td></tr>}
           </tbody>
         </table>
       </div>
-      <p className="note">
-        Activity is based on the last record each person uploaded: active under 2 hours, quiet 2 to 6, silent over 6. A scrutineer who is
-        offline will look silent until their phone syncs. The Records column counts current (non-superseded) tally records.
-      </p>
+      <p className="note">The Records column counts current (non-superseded) tally records each person uploaded.</p>
     </div>
   );
 }
